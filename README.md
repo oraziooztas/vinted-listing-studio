@@ -1,196 +1,159 @@
 # Vinted Listing Studio
 
-Una web app per creare annunci Vinted in modo veloce e consistente.
+A web application for creating and managing Vinted marketplace listings quickly and consistently. Catalog items, generate SEO-optimized titles and descriptions, calculate data-driven pricing, and prepare buyer response templates -- all backed by a local SQLite database.
 
-## Funzionalità
+## Features
 
-- **Wizard 3 step** per creare annunci completi
-- **Generazione automatica** di titoli SEO, descrizioni e tag
-- **Calcolo prezzi** con modello euristico (vendita veloce / massimo profitto)
-- **Template messaggi** per rispondere agli acquirenti
-- **ISBN Lookup** automatico per libri (Open Library / Google Books)
-- **Storico annunci** con stati (Bozza / Pubblicato / Venduto)
-- **Export** CSV e Markdown
-- **Dashboard** con KPI (annunci, vendite, tempo medio, prezzo medio)
-- **Copia rapida** di ogni sezione con un click
+- **3-Step Listing Wizard:** Guided flow to create complete, ready-to-publish listings
+- **SEO Content Generation:** Auto-generate optimized titles (max 60 chars), short descriptions (max 250 chars), full descriptions, and up to 12 tags
+- **Heuristic Pricing Model:** Calculate quick-sale and max-profit price ranges based on condition, urgency, rarity, depreciation, and comparable listings
+- **Buyer Response Templates:** Pre-written messages for five common scenarios (availability, discount requests, shipping, reservations, issue reports)
+- **ISBN Book Lookup:** Automatic metadata fetching for books via OpenLibrary or Google Books with 30-day caching and rate limiting
+- **Listing Lifecycle:** Track items through draft, published, and sold stages with timestamps and sale prices
+- **Dashboard with KPIs:** Overview of total listings, sales, average selling time, and average price
+- **Quick Copy:** One-click copy for any section of a listing
+- **Export:** CSV and Markdown export for all listings
+- **Configurable Text Styles:** Four styles (neutral, friendly, minimal, premium) and three tones (informal, standard, formal)
+- **Optional LLM Integration:** Use template engine (default, no API key) or connect Anthropic/OpenAI for advanced text generation
+- **PIN Protection:** Optional basic access protection
 
-## Stack Tecnologico
+## Tech Stack
 
-- Next.js 14 (App Router) + TypeScript
-- TailwindCSS + shadcn/ui
-- Prisma + SQLite (database locale)
-- Zod per validazione
+- **Framework:** Next.js 14 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS + shadcn/ui
+- **Database:** SQLite via Prisma ORM 5
+- **Validation:** Zod
+- **UI Components:** Radix UI (Dialog, Dropdown Menu, Select, Tabs, Checkbox, Slider, Toast, Tooltip)
+- **Icons:** Lucide React
+- **Date Utilities:** date-fns
+- **Testing:** Vitest
 
-## Installazione
+## Getting Started
+
+### Prerequisites
+
+- Node.js >= 18
+
+### Installation
 
 ```bash
-# Clona il repository
-git clone <repo-url>
+git clone <repository-url>
 cd vinted-listing-studio
-
-# Installa le dipendenze
 npm install
-
-# Crea il database e applica lo schema
-npx prisma db push
-
-# (Opzionale) Popola con dati demo
-npm run db:seed
-
-# Avvia in development
-npm run dev
 ```
 
-L'app sarà disponibile su http://localhost:3000
-
-## Comandi Disponibili
-
-| Comando | Descrizione |
-|---------|-------------|
-| `npm run dev` | Avvia in modalità development |
-| `npm run build` | Build per produzione |
-| `npm run start` | Avvia build di produzione |
-| `npm run lint` | Esegue ESLint |
-| `npm run test` | Esegue test unitari |
-| `npm run test:watch` | Test in watch mode |
-| `npm run db:push` | Applica schema Prisma |
-| `npm run db:migrate` | Crea migrazione Prisma |
-| `npm run db:seed` | Popola database con dati demo |
-| `npm run db:studio` | Apre Prisma Studio |
-
-## Configurazione
-
-### Variabili d'ambiente (.env)
+### Database Setup
 
 ```bash
-# Database (obbligatorio)
+# Create database and apply schema
+npx prisma db push
+
+# Seed with demo data (optional)
+npm run db:seed
+```
+
+### Configuration
+
+Create a `.env` file:
+
+```bash
+# Database (required)
 DATABASE_URL="file:./dev.db"
 
-# LLM Provider (opzionale - per generazione testi avanzata)
-# LLM_PROVIDER="anthropic" # oppure "openai"
+# LLM Provider (optional -- for advanced text generation)
+# LLM_PROVIDER="anthropic"  # or "openai"
 # ANTHROPIC_API_KEY="sk-..."
 # OPENAI_API_KEY="sk-..."
 
-# Google Books API (opzionale - per ISBN lookup)
+# Google Books API (optional -- for ISBN lookup)
 # GOOGLE_BOOKS_API_KEY="..."
 ```
 
-### Impostazioni In-App
-
-Vai su **Impostazioni** per configurare:
-
-- **PIN protezione** - Protegge l'accesso all'app (opzionale)
-- **Provider ISBN** - Open Library (gratuito) o Google Books
-- **Stili predefiniti** - Stile e tono default per nuovi annunci
-- **Provider LLM** - Template Engine (predefinito) o API esterna
-
-## Generazione Testi
-
-Il sistema supporta due modalità:
-
-### 1. Template Engine (Default)
-
-Genera testi usando regole e template predefiniti. Funziona offline senza API esterne.
-
-Stili disponibili:
-- **Neutro** - Descrizioni standard e professionali
-- **Cordiale** - Tono amichevole e personale
-- **Minimal** - Essenziale, poche parole
-- **Premium** - Sofisticato e curato
-
-Toni disponibili:
-- **Informale** - Tu, linguaggio casual
-- **Standard** - Equilibrato
-- **Formale** - Lei, linguaggio professionale
-
-### 2. Provider LLM (Opzionale)
-
-Configura una API key Anthropic o OpenAI per generazione avanzata.
-
-## ISBN Lookup
-
-La ricerca ISBN funziona con:
-
-- **Open Library** (default) - API gratuita, nessuna chiave richiesta
-- **Google Books** - API key opzionale per più richieste
-
-Implementa:
-- Rate limiting (1 richiesta/secondo)
-- Cache 30 giorni in database
-- Fallback graceful se lookup fallisce
-
-## Calcolo Prezzi
-
-Il modello euristico considera:
-
-- **Condizione** dell'oggetto (nuovo → da sistemare)
-- **Prezzo pagato** originale (se fornito)
-- **Anno acquisto** (deprezzamento annuale 5%)
-- **Urgenza** di vendita (1-5)
-- **Rarità** percepita (1-5)
-- **Prezzi comparabili** inseriti manualmente (max 3)
-
-Output:
-- Prezzo **vendita veloce** (aggressivo)
-- Range **massimo profitto** (min-max)
-- Indicazione **trattabile** si/no
-- Note e suggerimenti
-
-## Struttura Database
-
-```
-Item
-├── id, category, title, author, isbn, brand
-├── condition, defects, color, size, material
-├── pricePaid, yearBought, notes, images
-└── listing → Listing
-
-Listing
-├── id, itemId, style, tone
-├── seoTitle, shortDesc, longDesc, tagsCsv
-├── messages (5 template)
-├── priceQuick, priceMaxProfitMin/Max, negotiable
-├── status (bozza/pubblicato/venduto)
-└── dates (created, published, sold)
-
-Settings
-├── pinHash, isbnProvider, isbnApiKey
-├── defaultStyle, defaultTone
-└── llmProvider, llmApiKey
-```
-
-## Export
-
-### CSV
-Esporta tutti gli annunci con:
-- Titolo, descrizioni, tag
-- Prezzi consigliati
-- Categoria, condizione, stato
-- Date
-
-### Markdown
-Esporta singolo annuncio o tutti in formato `.md` pronto per copia.
-
-## Test
+### Running the App
 
 ```bash
-# Esegui tutti i test
-npm run test
+# Development
+npm run dev
 
-# Watch mode
+# Production build
+npm run build
+npm start
+
+# Run tests
+npm test
+
+# Tests in watch mode
 npm run test:watch
 ```
 
-Test coprono:
-- Calcolo prezzi (moltiplicatori, urgenza, rarità, comparabili)
-- Generazione testi (titoli, descrizioni, tag, messaggi)
+### Available Commands
 
-## Note Importanti
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npm run test` | Run unit tests |
+| `npm run test:watch` | Tests in watch mode |
+| `npm run db:push` | Apply Prisma schema |
+| `npm run db:migrate` | Create Prisma migration |
+| `npm run db:seed` | Seed database with demo data |
+| `npm run db:studio` | Open Prisma Studio |
 
-- **Nessun scraping** di Vinted o altri siti
-- App **single-user locale** (nessuna autenticazione complessa)
-- Database SQLite **locale** (file `dev.db`)
-- ISBN lookup usa solo **API pubbliche** con rate limiting
+## Project Structure
+
+```
+vinted-listing-studio/
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx               # Root layout
+│   │   ├── page.tsx                 # Dashboard with KPIs
+│   │   ├── annunci/                 # Listing management pages (wizard, detail, edit)
+│   │   ├── settings/                # App settings page
+│   │   └── api/                     # API routes (items, listings, settings, ISBN lookup)
+│   ├── components/
+│   │   ├── ui/                      # Reusable UI components (shadcn/ui)
+│   │   └── copy-button.tsx          # Copy-to-clipboard button
+│   ├── lib/                         # Prisma client, utilities
+│   ├── types/
+│   │   └── index.ts                 # TypeScript type definitions
+│   └── __tests__/                   # Unit tests (pricing, text generation)
+├── prisma/
+│   ├── schema.prisma                # Database schema (Item, Listing, Settings, IsbnCache)
+│   ├── seed.ts                      # Database seed script
+│   └── dev.db                       # SQLite database file
+├── package.json
+└── tsconfig.json
+```
+
+### Database Schema
+
+- **Item:** Product data (title, category, condition, brand/author, ISBN, color, size, material, weight, images, purchase info)
+- **Listing:** Generated content (SEO title, descriptions, tags, pricing, 5 response templates, status, sale data)
+- **Settings:** App configuration (PIN, ISBN provider, default style/tone, LLM provider)
+- **IsbnCache:** Cached ISBN lookup results with expiration dates
+
+## Pricing Model
+
+The heuristic pricing model considers:
+
+- **Condition:** Multiplier from new (highest) to needs-repair (lowest)
+- **Original price paid** and **year of purchase** (5% annual depreciation)
+- **Urgency to sell** (1-5 scale)
+- **Perceived rarity** (1-5 scale)
+- **Comparable prices** (up to 3 manually entered)
+
+Output includes a quick-sale price, a max-profit range (min-max), and a negotiable flag.
+
+## Notes
+
+- No scraping of Vinted or any other platform is performed.
+- The app is a single-user local tool -- no complex authentication required.
+- The SQLite database is stored as a local file (`dev.db`), making the app fully self-contained.
+- ISBN lookup uses only public APIs with rate limiting (1 request/second) and 30-day caching.
+- Tests cover pricing calculations (multipliers, urgency, rarity, comparables) and text generation (titles, descriptions, tags, messages).
 
 ## License
 
