@@ -1,0 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Item {
+  id           String    @id @default(cuid())
+  category     String    // "libro" | "altro"
+  title        String
+  author       String?   // solo per libri
+  isbn         String?   // solo per libri
+  publisher    String?   // editore
+  publishYear  Int?      // anno pubblicazione
+  language     String?   // lingua
+  brand        String?   // marca (per oggetti non libro)
+  condition    String    // "nuovo" | "come_nuovo" | "ottimo" | "buono" | "usato" | "da_sistemare"
+  defectsJson  String?   // JSON array di difetti
+  defectNotes  String?   // note sui difetti
+  color        String?
+  size         String?   // taglia
+  material     String?   // materiale
+  weight       Float?    // peso in grammi
+  notes        String?   // note generali
+  imagesJson   String?   // JSON array di paths immagini
+
+  // Dati per prezzo
+  pricePaid    Float?    // prezzo pagato originale
+  yearBought   Int?      // anno acquisto
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  listing      Listing?
+}
+
+model Listing {
+  id                   String    @id @default(cuid())
+  itemId               String    @unique
+  item                 Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  // Stile e tono
+  style                String    @default("neutro") // "neutro" | "cordiale" | "minimal" | "premium"
+  tone                 String    @default("standard") // "informale" | "standard" | "formale"
+
+  // Testi generati
+  seoTitle             String?   // max 60 char
+  shortDesc            String?   // max 250 char
+  longDesc             String?   // 2-5 paragrafi
+  tagsCsv              String?   // max 12 tag separati da virgola
+
+  // Messaggi template
+  messageAvailability  String?   // risposta disponibilità
+  messageDiscount      String?   // sconto richiesto
+  messageShipping      String?   // spedizione/tempi
+  messageReservation   String?   // prenotazione/riserva
+  messageProblem       String?   // problema segnalato
+
+  // Pricing
+  urgency              Int       @default(3) // 1-5
+  rarity               Int       @default(3) // 1-5
+  comparablesJson      String?   // JSON array di prezzi comparabili inseriti manualmente
+  priceQuick           Float?    // prezzo vendita veloce
+  priceMaxProfitMin    Float?    // range min massimo profitto
+  priceMaxProfitMax    Float?    // range max massimo profitto
+  negotiable           Boolean   @default(true)
+
+  // Stato
+  status               String    @default("bozza") // "bozza" | "pubblicato" | "venduto"
+  publishedAt          DateTime?
+  soldAt               DateTime?
+  soldPrice            Float?    // prezzo effettivo vendita
+
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model Settings {
+  id              Int      @id @default(1)
+  pinHash         String?  // hash del PIN per protezione base
+
+  // ISBN Provider
+  isbnProvider    String   @default("openlibrary") // "openlibrary" | "googlebooks" | "disabled"
+  isbnApiKey      String?  // API key per Google Books (opzionale)
+
+  // Default stili
+  defaultStyle    String   @default("neutro")
+  defaultTone     String   @default("standard")
+
+  // LLM Provider (opzionale)
+  llmProvider     String   @default("template") // "template" | "anthropic" | "openai"
+  llmApiKey       String?  // API key per LLM
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// Cache per ISBN lookup
+model IsbnCache {
+  id          String   @id @default(cuid())
+  isbn        String   @unique
+  dataJson    String   // JSON con dati libro
+  provider    String   // provider usato
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime // scadenza cache
+}
